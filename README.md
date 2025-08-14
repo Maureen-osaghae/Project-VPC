@@ -57,7 +57,54 @@ The directories for this project as outlined below.
 
 <h1>Task 1: VPC Module</h1>
 The VPC module will be the first we create and deploy. This will build our network infrastructure and create the necessary subnets, route tables, NAT Gateway, and Internet Gateway. Everything else will be built on top of this module.
-Let’s first define the module in our root main.tf (not the one within the modules directory) file. /main.tf
+
+I will first define the module in our root main.tf (not the one within the modules directory) file. /main.tf
+
+#VPC Network #
+module "networking" {
+  source = "./modules/vpc"
+  
+       vpc_confi =   = {
+             cidr_block           = "10.0.0.0/16"
+         enable_dns_hostnames     = true
+         enable_dns_support       = true
+         availability_zones       = ["us-east-1a", "us-east-1b"]
+         tags = {
+           "Name" = "main"
+         }
+       }
+     }
+
+
+vpc_config is a variable defined in the vpc module that we’ll plan to build. For now you’ll want to understand that we’re defining the VPC’s CIDR block, enabling DNS support, specifying the availability zones, and adding tags to the VPC. These values allow us to customize our network and will be passed to the vpc module.
+
+Setting cidr_block to 10.0.0.0/16 will create a VPC with that network.
+Enabling dns_hostnames and dns_support will allow our instances to resolve DNS names and have DNS resolution which is required for SSM to work.
+Setting availability_zones to ["us-east-1a", "us-east-1b"] will create the VPC’s subnets in us-east-1a and us-east-1b respectively. The module is capable of scaling subnets and associated network components into multiple availability zones if desired.
+Finally we are setting tags
+
+<h2>Task 1.1: VPC Module Variables File</h2>h2>
+Next, let’s define the variables for the VPC module in the variables.tf file in the vpc module directory.
+
+Modules/vpc/variables.tf
+
+This file defines the vpc_config variable that gets passed to the VPC module. It’s an object type that contains the VPC’s CIDR block, DNS settings, availability zones, and tags. We covered the variables and their values already but here we can see the type of value expected for each. Let’s take a look,
+
+cidr_block is a string so the expected value should be in quotes e.g., "10.0.0.0/16"
+enable_dns_hostnames and enable_dns_support are optional boolean values that default to true if not provided
+availability_zones is a list of strings that should be in square brackets e.g., ["us-east-1a", "us-east-1b"]
+tags is a map of strings that should be in curly brackets
+Within the description, we’ve got an <<EOT followed by a description and ending with EOT. EOT, if you’re not familiar, is used for multi-line strings where we start with << and then a delimiter, in this case EOT to indicate where it starts and where it ends. So it’s not providing functionality, it’s just helping us write a larger description
+
+<img width="617" height="290" alt="image" src="https://github.com/user-attachments/assets/eef147d6-86fb-4773-8581-99cce4642a22" />
+
+Now, let’s begin creating the VPC module’s main.tf file.
+
+In this file, we’re creating local variables to store the number of public and private subnets we’ll create. We’re setting the number of subnets to the length of the availability zones provided in the vpc_config variable. This allows us to scale the number of subnets based on the number of availability zones provided. So, if we provide two availability zones e.g., ["us-east-1a", "us-east-1b"], we’ll create two public and two private subnets in each zone.
+
+We’re also using a data source to get the current region. This will allow us to reference the region in our resources without hardcoding it.
+
+
 
 
 
