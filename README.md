@@ -51,6 +51,17 @@ Create the various .tf files in the ssm, vpc and ec2 diretory
 
 <img width="449" height="294" alt="image" src="https://github.com/user-attachments/assets/84ded38d-ccaa-4588-b61c-5d63d5605933" />
 
+The directories for this project as outlined below. 
+
+<img width="767" height="328" alt="image" src="https://github.com/user-attachments/assets/e1aace18-9277-4128-8024-d4a5c2479a0f" />
+
+<h1>Task 1: VPC Module</h1>
+The VPC module will be the first we create and deploy. This will build our network infrastructure and create the necessary subnets, route tables, NAT Gateway, and Internet Gateway. Everything else will be built on top of this module.
+Let’s first define the module in our root main.tf (not the one within the modules directory) file. /main.tf
+
+
+
+
 
 
 
