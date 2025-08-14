@@ -39,6 +39,19 @@ Create the files
 
     touch main.tf provider.tf variables.tf output.tf
 
+Create a sub directory
+     
+     mkdir Modules
+
+     cd Modules
+Create three sub directory under the Modules directory
+     
+          mkdir ec2 ssm vpc
+Create the various .tf files in the ssm, vpc and ec2 diretory
+
+<img width="449" height="294" alt="image" src="https://github.com/user-attachments/assets/84ded38d-ccaa-4588-b61c-5d63d5605933" />
+
+
 
 
 
