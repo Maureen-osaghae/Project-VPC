@@ -158,7 +158,116 @@ Modules/vpc/main.tf
      }
      
 
+In this section, we’re creating subnets based on the number of availability zones provided in the vpc_config variable. If we provide two availability zones, then a subnet will be created and associated with each zone. The CIDR block for each subnet is automatically generated based on the VPC CIDR block by using the terraform cidrsubnet function. The subnets are tagged with a name e.g., tf_public_subnet_1 and tf_public_subnet_2 if we have two availability zones.
 
+It’s important to note that subnets are all private by default until we associate them with a route table that has a route to the Internet Gateway. However, by naming our terraform resource block public, it’ll make it easier to distinguish and reference these resources later on.
+
+<h2>Route table for the public subnets</h2>
+Now let’s create a route table for the public subnets. We’re associating the route table with the public subnets and creating a route to the VPC’s Internet Gateway, which will make them public. This route will allow non-local traffic to be sent to the Internet Gateway.
+
+Modules/vpc/main.tf
+
+     # create a route table for the public subnets
+     resource "aws_route_table" "public" {
+       vpc_id = aws_vpc.vpc.id
+       route {
+         cidr_block = "0.0.0.0/0"
+         gateway_id = aws_internet_gateway.igw.id
+       }
+     }
+     
+     # Associate the route table with the public subnets
+     resource "aws_route_table_association" "public" {
+       count          = local.num_of_public_subnets       # creates an association for each public subnet
+       subnet_id      = aws_subnet.public[count.index].id # gets each public subnet id
+       route_table_id = aws_route_table.public.id         # adds the associations to the route table
+     }
+<h2>Create Private Subnets</h2>
+
+Modules/vpc/main.tf
+
+##### Private Subnets and Associated Route Tables #####
+     
+     # create private subnets
+     resource "aws_subnet" "private" {
+       count             = local.num_of_private_subnets                           # creates a subnet for each availability zone
+       vpc_id            = aws_vpc.vpc.id                                         # assigns the subnet to the VPC
+       availability_zone = var.vpc_config.availability_zones[count.index]         # assigns each subnet to an availability zone
+       cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 4, count.index + 1) # function that automatically creates subnet CIDR blocks based on the VPC CIDR block
+       tags = {
+         "Name" = "tf_private_subnet_${count.index + 1}"
+       }
+     }
+
+In this section, we’re creating private subnets. The process is similar to creating public subnets but our CIDR block is generated slightly differently so the subnets don’t overlap with the public subnets. Subnetting can get a little bit tricky, so if you’re not already familiar with it, I would highly recommend checking out the documentation for the cidrsubnet() function
+
+<h2>Route table associations for private subnet</h2>
+Modules/vpc/main.tf
+
+     # create route tables for each private
+     resource "aws_route_table" "private" {
+       count  = local.num_of_private_subnets
+       vpc_id = aws_vpc.vpc.id
+     
+       route {
+         cidr_block     = "0.0.0.0/0"
+         nat_gateway_id = aws_nat_gateway.ngw[count.index].id
+       }
+     }
+     
+     # Associate the route tables with the private subnets
+     resource "aws_route_table_association" "private" {
+       count          = local.num_of_private_subnets                        # creates an association for each private subnet
+       subnet_id      = aws_subnet.private[count.index].id                  # gets each private subnet id
+       route_table_id = element(aws_route_table.private[*].id, count.index) # associates the private subnets with each private route tables
+     }
+
+In this section, we’re creating and associating the route table with the private subnets and creating a route to the NAT Gateway. This route will allow non-local traffic to be sent to the NAT Gateway and out to the internet.
+
+<h2>Create Elastic IP and NAT Gateway</h2>
+Finally, let’s create the Elastic IP and NAT Gateway resources. The NAT Gateway gets deployed in each public subnet and is associated with an Elastic IP.
+
+Modules/vpc/main.tf
+
+     # Create an Elastic IP for each NAT Gateway
+     resource "aws_eip" "ngw" {
+       count = local.num_of_public_subnets # Number of NAT Gateways
+     
+       tags = {
+         "Name" = "tf_nat_gateway_${count.index + 1}"
+       }
+     }
+     
+     # Create a NAT Gateway for each public subnet
+     resource "aws_nat_gateway" "ngw" {
+       count         = local.num_of_public_subnets                   # creates a NAT Gateway for each public subnet
+       allocation_id = element(aws_eip.ngw[*].id, count.index)       # assigns an Elastic IP to each NAT Gateway
+       subnet_id     = element(aws_subnet.public[*].id, count.index) # assigns each NAT Gateway to a public subnet
+       depends_on    = [aws_internet_gateway.igw]                    # NAT Gateway depends on the Internet Gateway
+     
+       tags = {
+         "Name" = "tf_nat_gateway_${count.index + 1}"
+       }
+     }
+
+<h2>Task 1.3: VPC Module Outputs File</h2>
+
+Before we wrap up with our VPC, let’s go ahead and output values. We’ll want the outputs to include the VPC ID, public subnet IDs, private subnet IDs, Internet Gateway ID, and NAT Gateway IDs. This allows us to easily reference and use those resources elsewhere if needed.
+
+Modules/vpc/outputs.tf
+
+     # output map of vpc related resources
+     output "vpc_resources" {
+       value = {
+         vpc_id              = aws_vpc.vpc.id
+         public_subnet_ids   = aws_subnet.public[*].id
+         private_subnet_ids  = aws_subnet.private[*].id
+         internet_gateway_id = aws_internet_gateway.igw.id
+         nat_gateway_ids     = aws_nat_gateway.ngw[*].id
+       }
+     }
+
+That’s it for the VPC module! We’ve created a network with subnets, route tables, NAT Gateway, and Internet Gateway. We’ve also tagged our resources for easy identification. Let’s move on to deployment to test this out and make sure it works!
 
 
 
