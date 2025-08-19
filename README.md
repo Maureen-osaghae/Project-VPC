@@ -305,6 +305,9 @@ modules/ssm/outputs.tf
 
 <img width="624" height="196" alt="image" src="https://github.com/user-attachments/assets/c8d3a75d-3c3f-45b9-881f-2b4fe40093e6" />
 
+Conclusion
+That’s it for the SSM module! Not too much going on. We’ve defined the code for an IAM Role and SSM regional configuration, and now we’re ready to test it out by deploying which we’ll do in the next lab!
+
 
 
 
