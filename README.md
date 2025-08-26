@@ -442,6 +442,46 @@ I’ve defined the code for an EC2 instance using the latest Amazon Linux AMI.
 <h1>Deploying EC2 instances in a custom VPC with Terraform</h1>
 We’ve got our EC2 module created, but now we need to import this module into our root main.tf file to actually create the instances we need. 
 
+<h1>Adding our EC2 modules</h1>
+We need to create two instances by adding two module blocks: one will create a public EC2 instance in the first public subnet, and the other will create a private EC2 instance in the first private subnet. main.tf file
+
+<img width="881" height="464" alt="image" src="https://github.com/user-attachments/assets/f2ae39ca-1aa3-44e2-828b-9922ab0eb9d7" />
+
+<h1> Configure your AWS CLI</h1>
+
+ <h3>Terraform init command:</h3>
+
+<img width="696" height="254" alt="image" src="https://github.com/user-attachments/assets/1609552b-5b5a-4907-909a-2b2ed561f86c" />
+
+<h3>Terraform plan command</h3>
+Running a plan should show that we’re creating two EC2 instances, one in the public subnet and one in the private subnet. Additionally, the plan will show the planned outputs of the public and private EC2 instance IDs.
+
+<img width="693" height="323" alt="image" src="https://github.com/user-attachments/assets/a72f75ba-8db6-4b3e-9f5a-de2ddb1973e0" />
+
+<h3>Terraform apply</h3>
+
+After applying the configuration, you should see both instances IDs outputted to the console. We’ll need these shortly when we use SSM to interact with the EC2 instances.
+
+<img width="634" height="130" alt="image" src="https://github.com/user-attachments/assets/2fa965e2-cb93-496c-9323-16d0b0932a17" />
+
+<img width="907" height="483" alt="image" src="https://github.com/user-attachments/assets/67c5a2bb-cf80-472b-aa4b-dd082d7bd8f1" />
+
+<img width="668" height="320" alt="image" src="https://github.com/user-attachments/assets/7978eb93-1b3a-4666-a6c4-b36fccc89420" />
+
+<h3>Terraform Destroy</h3>
+Awesome!  Now, let’s destroy these resources and let’s finish up by configuring our last security groups.
+
+<img width="725" height="53" alt="image" src="https://github.com/user-attachments/assets/0996c440-2a0a-4619-832e-fbc06d3aedf1" />
+
+
+
+
+
+
+
+
+
+
 
 
 
