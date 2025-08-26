@@ -410,7 +410,41 @@ Now, run terraform apply:
 <img width="650" height="114" alt="image" src="https://github.com/user-attachments/assets/556ca54a-1187-4633-81cd-b5cc2f704f2c" />
 
 <h1>Conclusion</h1>
-We’re well on our way to completing this project now that we have our VPC endpoints for SSM. Our next step is to create our EC2 instance module, so go ahead and complete this lab and I’ll see you in the next lesson
+We’re well on our way to completing this project now that we have our VPC endpoints for SSM. Our next step is to create our EC2 instance module, so go ahead and complete this lab and I’ll see you in the next section.
+
+<h2>Creating the EC2 instance module</h2>
+It’s time to create an EC2 module that builds us an EC2 using the latest Amazon Linux operating system. 
+
+<h1>EC2 Module Main File</h1>
+
+Let’s begin creating the EC2 module’s main.tf file. I’ll reuse a lot of the code that I used in the prior section when I learned how to create EC2s and how to grab the latest AMIs. 
+
+<img width="695" height="467" alt="image" src="https://github.com/user-attachments/assets/896e39cd-b345-4f0b-8abc-a47c852c3f7e" />
+
+This section creates a data source to get the latest Amazon Linux AMI. We’re filtering the AMI by the name, platform, root device type, and architecture. This data source will return the most recent Amazon Linux AMI that matches the filter criteria.
+Then we create an EC2 instance using that same Amazon Linux AMI. We’re passing in the instance type, subnet ID, whether or not to use a public IP, security groups, and tags as variables.
+
+<h1>EC2 Module Variables File</h1>
+In the variables.tf file, we define the variables that will be passed into the EC2 module.
+Modules/ec2/variables.tf
+
+<img width="670" height="362" alt="image" src="https://github.com/user-attachments/assets/17a87680-518d-4866-9234-7b82da78b706" />
+
+<h1>EC2 Module Outputs File</h1>
+
+Within the outputs.tf file, we’ll define a few properties of the EC2 instance that we want to output. This will allow us to reference these properties in other modules or resources as needed.
+
+Modules/ec2/outputs.tf
+<img width="557" height="177" alt="image" src="https://github.com/user-attachments/assets/375a4b8a-ed24-4ff3-8bed-a307165ca260" />
+
+I’ve defined the code for an EC2 instance using the latest Amazon Linux AMI. 
+
+<h1>Deploying EC2 instances in a custom VPC with Terraform</h1>
+We’ve got our EC2 module created, but now we need to import this module into our root main.tf file to actually create the instances we need. 
+
+
+
+
 
 
 
